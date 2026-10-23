@@ -48,14 +48,14 @@ The code for predicting is contained in the [`src/predict.py`](https://github.co
 cd src/
 ```
 
-| Parameter | Required | Description |
-| --- | --- | --- |
-| `--data_path` | Yes | Input CSV or FASTA file. CSV input must include the columns described above. |
-| `--model_path` | Yes | Path to the trained classifier checkpoint (`.pt`). |
-| `--model_unsupervised` | Yes | Path to the pretrained DNABERT-2 model and tokenizer files. |
-| `--batch_size` | Yes | Number of sequences processed per batch. |
-| `--family2id` | Yes | CSV mapping families to IDs, with `Family` and `id_Family` columns. |
-| `--conformal THRESHOLD` | No | Threshold for conformal prediction (for example, `0.9899547258391976`). Omit it to output top-1 predictions. |
+| Parameter | Description |
+| --- | --- |
+| `--data_path` | Input CSV or FASTA file. CSV input must include the columns described above. |
+| `--model_path` | Path to the trained classifier checkpoint (`.pt`). |
+| `--model_unsupervised` | Path to the pretrained DNABERT-2 model and tokenizer files. |
+| `--batch_size` | Number of sequences processed per batch. |
+| `--family2id` | CSV mapping families to IDs, with `Family` and `id_Family` columns. |
+| `--conformal THRESHOLD` | Threshold for conformal prediction (for example, `0.9899547258391976`). Omit it to output top-1 predictions. |
 
 The pretrained DNABERT-2 model is included in `models/DNABERT_2_pretrained/`. From `src/`, pass its local path using `--model_unsupervised`. For example, to evaluate predictions on a labeled CSV:
 
