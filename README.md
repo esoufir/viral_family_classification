@@ -2,6 +2,8 @@
 
 ## Description
 
+This repository contains the finetuned version of DNABERT-2 (https://github.com/MAGICS-LAB/DNABERT_2) for viral taxonomy classification. 
+
 This repository contains the training code and the model's weights of the publication []. 
 
 ## Getting Started
@@ -37,33 +39,23 @@ Training and validation CSV files must contain these columns:
 | `Seq` | DNA sequence |
 | `id_Family` | Numeric family label |
 
-For prediction, a labeled CSV must also contain a `Family` column with the family name for each row. The `--family2id` file must be a CSV with `Family` and `id_Family` columns to compute . Alternatively, `--data_path` can point to a FASTA file : its record IDs and sequences are read directly, without labels.
+For prediction, a labeled CSV must also contain a `Family` column with the family name for each row. The `--family2id` file must be a CSV with `Family` and `id_Family` columns to map family names to class IDs. Alternatively, `--data_path` can point to a FASTA file: its record IDs and sequences are read directly, without labels.
 
 ### Predict with the model
 
-The code is contained in the `src/` folder. 
+The code for predicting is contained in the [`src/predict.py`](https://github.com/esoufir/viral_family_classification/tree/main/src/predict.py) file.  
 ```
 cd src/
 ```
 
-```
-usage: predict.py [-h] [--data_path DATA_PATH] [--model_path MODEL_PATH] [--model_unsupervised MODEL_UNSUPERVISED] [--batch_size BATCH_SIZE] [--conformal [CONFORMAL]] [--family2id FAMILY2ID]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --data_path DATA_PATH
-                        Path to data on which to predict (CSV OR FASTA).
-  --model_path MODEL_PATH
-                        Path to model's weights.
-  --model_unsupervised MODEL_UNSUPERVISED
-                        Path to model's weights pretrained for tokenizer.
-  --batch_size BATCH_SIZE
-                        Train batch size.
-  --conformal [CONFORMAL]
-                        Optional conformal prediction threshold.
-  --family2id FAMILY2ID
-                        Family 2 id correspondance file
-```
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `--data_path` | Yes | Input CSV or FASTA file. CSV input must include the columns described above. |
+| `--model_path` | Yes | Path to the trained classifier checkpoint (`.pt`). |
+| `--model_unsupervised` | Yes | Path to the pretrained DNABERT-2 model and tokenizer files. |
+| `--batch_size` | Yes | Number of sequences processed per batch. |
+| `--family2id` | Yes | CSV mapping families to IDs, with `Family` and `id_Family` columns. |
+| `--conformal THRESHOLD` | No | Threshold for conformal prediction (for example, `0.9899547258391976`). Omit it to output top-1 predictions. |
 
 The pretrained DNABERT-2 model is included in `models/DNABERT_2_pretrained/`. From `src/`, pass its local path using `--model_unsupervised`. For example, to evaluate predictions on a labeled CSV:
 
@@ -93,50 +85,34 @@ All prediction files are written to `src/predictions/`.
 
 ### Training code
 
+The main training code is contained in the [`src/classification_dnabert2.py`](https://github.com/esoufir/viral_family_classification/tree/main/src/classification_dnabert2.py) file. 
 
-```
-usage: classification_dnabert2.py [-h] [--datapath DATAPATH] [--train_dataname TRAIN_DATANAME] [--val_dataname VAL_DATANAME] [--train_batch_size TRAIN_BATCH_SIZE]
-                                  [--val_batch_size VAL_BATCH_SIZE] [--epochs EPOCHS] [--start_epoch START_EPOCH] [--lr LR] [--max_length MAX_LENGTH] [--output_dir OUTPUT_DIR]
-                                  [--tokenizer TOKENIZER] [--model_unsupervised MODEL_UNSUPERVISED] [--label_column LABEL_COLUMN] [--subsample_rank SUBSAMPLE_RANK] [--freeze]
-                                  [--subsample] [--resume RESUME]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --datapath DATAPATH   Path to data folder.
-  --train_dataname TRAIN_DATANAME
-                        Training data filename.
-  --val_dataname VAL_DATANAME
-                        Validation data filename.
-  --train_batch_size TRAIN_BATCH_SIZE
-                        Train batch size.
-  --val_batch_size VAL_BATCH_SIZE
-                        Validation batch size.
-  --epochs EPOCHS       Number of epochs for training.
-  --start_epoch START_EPOCH
-                        Init epoch to start the training.
-  --lr LR               Learning rate value.
-  --max_length MAX_LENGTH
-                        Max length of tokens
-  --output_dir OUTPUT_DIR
-                        Directory to save model checkpoints
-  --tokenizer TOKENIZER
-                        Path to used tokenizer (defaults to --model_unsupervised)
-  --model_unsupervised MODEL_UNSUPERVISED
-                        Path to used pretrained weights.
-  --label_column LABEL_COLUMN
-                        Column name of the label in the csv file.
-  --subsample_rank SUBSAMPLE_RANK
-                        Subsample the training data to only include a specific rank
-  --freeze              Freeze the pretrained weights
-  --subsample           Subsample the training data
-  --resume RESUME       Resume the training using the given checkpoint.
-```
+| Parameter | Description |
+| --- | --- |
+| `--datapath` | Directory containing the training and validation CSV files. |
+| `--train_dataname` | Training CSV filename. |
+| `--val_dataname` | Validation CSV filename. |
+| `--epochs` | Final epoch number for this run. |
+| `--train_batch_size` | Training batch size. |
+| `--val_batch_size` | Validation batch size. |
+| `--start_epoch` | First epoch to run (set automatically when resuming). |
+| `--lr` | Learning rate. |
+| `--max_length` | Maximum token sequence length. |
+| `--model_unsupervised` | Pretrained model path or Hugging Face identifier. For the included local weights, use `../models/DNABERT_2_pretrained/` from `src/`. |
+| `--tokenizer` | Tokenizer path, if it is stored separately from the pretrained model. |
+| `--label_column` | Name of the class-label column in the CSV files. |
+| `--subsample_rank` | Optional CSV column used to select a rank when subsampling. |
+| `--subsample` | Balance the sampled training examples by class. |
+| `--freeze` | Freeze pretrained DNABERT-2 weights during training. |
+| `--resume`| Path to a full-model checkpoint from which to continue training. |
+| `--output_dir` | The script sets this to `outputs/<timestamp>/checkpoints`; a value passed on the command line is replaced. |
 
 You can adjust the different hyperparameters to your liking and to suit your computationnal ressources. The training was made on GPU V100/A100.
 
 For example, to train on the `toy_dataset` :
 ```
-python classification_dnabert2.py --datapath ../toy_example/ --train_dataname train_augmented.csv --val_dataname val.csv --model_unsupervised ../models/DNABERT_2_pretrained/ --train_batch_size 10 --val_batch_size 10 --epochs 5
+python classification_dnabert2.py --datapath ../toy_example/ \  
+--train_dataname train_augmented.csv --val_dataname val.csv  \ --model_unsupervised ../models/DNABERT_2_pretrained/ \ --train_batch_size 10 --val_batch_size 10 --epochs 5
 ```
 
 
@@ -157,11 +133,8 @@ outputs/YYYY-MM-DD_HH-MM-SS/
 
 The full-model checkpoint can be used with `predict.py` through `--model_path`. To continue training from one, pass its path to `--resume` and provide the training and model arguments again. `--epochs` is the final epoch number, not the number of additional epochs. For example, to continue from epoch 5 through epoch 10:
 
-```
-python classification_dnabert2.py --datapath ../toy_example/ --train_dataname train_augmented.csv --val_dataname val.csv --model_unsupervised ../models/DNABERT_2_pretrained/ --train_batch_size 10 --val_batch_size 10 --epochs 10 --resume ../outputs/YYYY-MM-DD_HH-MM-SS/checkpoints/model_epoch_5_train_augmented_pretrained_True.pt
-```
 
-Resuming restores the model weights, but not the optimizer or scheduler state. New logs and saved arguments go in a new timestamped run directory; resumed checkpoints are written to the directory containing the checkpoint passed to `--resume`.
+Resuming restores the model weights, but not the optimizer or scheduler state. New logs and saved arguments go in a new timestamped run directory. Resumed checkpoints are written to the directory containing the checkpoint passed to `--resume`.
 
 ## Acknowledgments
 
