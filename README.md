@@ -6,37 +6,31 @@ This repository contains the training code and the model's weights of the public
 
 ## Getting Started
 
-### Dependencies
+### Setting up
 
 Models were trained using python and pytorch library. 
-
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* The `environnement.yaml` file contains the full list of used librairies and packages. 
-
-### Installing
 
 * Clone this project :
 
 
 ```
-code blocks for commands
+git clone https://github.com/esoufir/viral_family_classification.git
+cd viral_family_classification
 ```
 
-
-
-* Use the `environnement.yaml` :
+* The `environnement.yaml` file contains the full list of used librairies and packages. Use the it to install dependencies :
 
 ```
-code blocks for commands
+conda env create --file=environment.yaml
+conda activate viral_family_classification
 ```
-
-
-* How/where to download your program
-* Any modifications needed to be made to files/folders
 
 ### Predict with the model
 
-
+The code is contained in the `src/` folder. 
+```
+cd src/
+```
 
 ```
 usage: predict.py [-h] [--data_path DATA_PATH] [--model_path MODEL_PATH]
@@ -64,12 +58,12 @@ optional arguments:
 
 To perform top-1 predictions on a viral contig FASTA file, run :
 
-* How to run the program
-* Step-by-step bullets
+
 ```
-code blocks for commands
-```
+
 ##### Conformal predictions
+
+Especially, to perform conformal predictions, use the `--conformal` argument with the threshold
 
 ### Training code
 
