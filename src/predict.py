@@ -53,7 +53,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
         # When lables are availables :
         if isinstance(test_loader.dataset, SamplesNames):
             predictions, probas, true_labels = [], [], []
-            for batch in tqdm(test_loader, desc="Testing"):
+            for batch in tqdm(test_loader, desc="Predicting"):
                 seq, labels = batch["sequence"], batch["label"]
                 tokens = tokenizer(
                         list(seq),
@@ -104,7 +104,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
         # When labels are not availables:
         else: 
             ids, predictions, probas = [], [], []
-            for batch in tqdm(test_loader, desc="Testing"):
+            for batch in tqdm(test_loader, desc="Predicting"):
                 id, seq = batch["id"], batch["sequence"]
                 tokens = tokenizer(
                     list(seq),
@@ -156,7 +156,7 @@ def predict_conformal(model, test_loader, tokenizer, device, args, output_dir):
                 "conformal_pred_classes",
             ]
             writer.writerow(header)
-            for batch in tqdm(test_loader, desc="Testing"):
+            for batch in tqdm(test_loader, desc="Predicting"):
                 ids, seq, labels, label_names = (
                     batch["id"],
                     batch["sequence"],
@@ -209,7 +209,7 @@ def predict_conformal(model, test_loader, tokenizer, device, args, output_dir):
             header = [ "Contig", "prediction", "label_prediction",
                 "proba_max","conformal_pred_ids","conformal_pred_classes"]
             writer.writerow(header)
-            for batch in tqdm(test_loader, desc="Testing"):
+            for batch in tqdm(test_loader, desc="Predicting"):
                 ids, seq = batch["id"],batch["sequence"]
                 tokens = tokenizer(
                     list(seq),
