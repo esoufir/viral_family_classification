@@ -1,4 +1,9 @@
+"""
+Code for predicting viral family classification using a trained model.
+"""
+
 import logging
+import sys
 import csv
 import argparse
 import torch
@@ -38,6 +43,7 @@ def get_args():
     args = parser.parse_args()
     if not vars(args) or all(v is None for v in vars(args).values()):
         parser.print_help()
+        sys.exit(0)
     return args
 
 

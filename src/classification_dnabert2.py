@@ -3,6 +3,7 @@ Main code for training the classifier.
 """
 
 import os
+import sys
 import argparse
 import datetime
 import logging
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument("--val_dataname", type=str, help="Validation data filename.")
     parser.add_argument("--train_batch_size", type=int, default=64, help="Train batch size.")
     parser.add_argument("--val_batch_size", type=int, default=64, help="Validation batch size.")
-    parser.add_argument("--epochs", type=int, default=20, help="Number of epochs for training.")
+    parser.add_argument("--epochs", type=int, help="Number of epochs for training.")
     parser.add_argument("--start_epoch", type=int, default=1, help="Init epoch to start the training.")
     parser.add_argument("--lr", type=float, default=5e-5, help="Learning rate value.")
     parser.add_argument(
@@ -74,10 +75,10 @@ if __name__ == "__main__":
         default="DNABERT_2_pretrained",
         help="Path to used pretrained weights.",
     )
-    parser.add_argument("--label_column", type=str, default="id_Family")
-    parser.add_argument("--subsample_rank", type=str, default=None)
-    parser.add_argument("--freeze", action="store_true")
-    parser.add_argument("--subsample", action="store_true")
+    parser.add_argument("--label_column", type=str, default="id_Family", help="Column name of the label in the csv file.")
+    parser.add_argument("--subsample_rank", type=str, default=None, help="Subsample the training data to only include a specific rank")
+    parser.add_argument("--freeze", action="store_true", help="Freeze the pretrained weights")
+    parser.add_argument("--subsample", action="store_true", help="Subsample the training data")
     parser.add_argument(
         "--resume",
         type=str,
@@ -85,4 +86,7 @@ if __name__ == "__main__":
         help="Resume the training using the given checkpoint.",
     )
     args = parser.parse_args()
+    if not vars(args) or all(v is None for v in vars(args).values()):
+        parser.print_help()
+        sys.exit(0)
     main(args)
