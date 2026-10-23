@@ -282,7 +282,7 @@ def main(args):
     logger.info("Loading data...")
     if args.data_path.endswith(".csv"):
         test_loader = contig_loader_csv_test(args)
-    else: 
+    else:
         test_loader = contig_loader_fasta(args)
         args.is_fasta=True
     logger.info("Dataname:%s", args.data_path)
