@@ -158,8 +158,8 @@ class BertUnpadSelfAttention(nn.Module):
                         'b s (t h d) -> b s t h d',
                         t=3,
                         h=self.num_attention_heads)
-        if self.p_dropout or flash_attn_qkvpacked_func is None:
-            # if we have nonzero attention dropout (e.g. during fine-tuning) or no Triton, compute attention in PyTorch
+        if self.p_dropout or flash_attn_qkvpacked_func is None or not qkv.is_cuda:
+            # Use PyTorch attention for dropout, missing Triton, or CPU inputs.
             q = qkv[:, :, 0, :, :].permute(0, 2, 1, 3)  # b h s d
             k = qkv[:, :, 1, :, :].permute(0, 2, 3, 1)  # b h d s
             v = qkv[:, :, 2, :, :].permute(0, 2, 1, 3)  # b h s d
@@ -909,4 +909,3 @@ class BertForSequenceClassification(BertPreTrainedModel):
             hidden_states=outputs[0],
             attentions=None,
         )
-
