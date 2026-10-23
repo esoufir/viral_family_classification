@@ -268,16 +268,16 @@ def main(args):
     args.rank="Family"
     args.num_classes = len(family_to_id)
 
+    log_dir = Path("outputs") / output_dir / "predictions"
+    log_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
-        filename=Path("outputs")
-        / Path(output_dir)
-        / "predictions"
-        / "predict_dnabert2.log",
+        filename=log_dir / "predict_dnabert2.log",
         level=logging.INFO,
         filemode="w",
         format="%(asctime)s %(levelname)s %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+    
     logger.info("Classification prediction")
     logger.info("Loading data...")
     if args.data_path.endswith(".csv"):
