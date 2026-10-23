@@ -26,18 +26,19 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str, help="Path to data on which to predict (CSV OR FASTA).")
     parser.add_argument("--model_path", type=str, help="Path to model's weights.")
-    parser.add_argument("--model_unsupervised",default="DNABERT_2_pretrained", type=str, help="Path to model's weights pretrained for tokenizer.")
-    parser.add_argument("--batch_size", type=int, default=64, help="Train batch size.")
+    parser.add_argument("--model_unsupervised", type=str, help="Path to model's weights pretrained for tokenizer.")
+    parser.add_argument("--batch_size", type=int, help="Train batch size.")
     parser.add_argument(
         "--conformal",
         nargs="?",
-        default=0.99,
         type=float,
         help="Optional conformal prediction threshold."
     )
     parser.add_argument("--family2id", type=str, help="Family 2 id correspondance file")
-    parser.add_argument("--num_classes", type=int, default=128, help="Number of classes.")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not vars(args) or all(v is None for v in vars(args).values()):
+        parser.print_help()
+    return args
 
 
 def predict(model, test_loader, tokenizer, device, args, output_dir):
@@ -46,7 +47,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
         # When lables are availables :
         if isinstance(test_loader.dataset, SamplesNames):
             predictions, probas, true_labels = [], [], []
-            for batch in tqdm(test_loader, desc=f"Testing"):
+            for batch in tqdm(test_loader, desc="Testing"):
                 seq, labels = batch["sequence"], batch["label"]
                 tokens = tokenizer(
                         list(seq),
@@ -97,7 +98,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
         # When labels are not availables:
         else: 
             ids, predictions, probas = [], [], []
-            for batch in tqdm(test_loader, desc=f"Testing"):
+            for batch in tqdm(test_loader, desc="Testing"):
                 id, seq = batch["id"], batch["sequence"]
                 tokens = tokenizer(
                     list(seq),
@@ -259,6 +260,7 @@ def main(args):
     args.max_length = 300
     args.is_fasta = False
     args.rank="Family"
+    args.num_classes = len(family_to_id)
 
     logging.basicConfig(
         filename=Path("outputs")
