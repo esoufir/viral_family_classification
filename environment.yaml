@@ -1,4 +1,4 @@
-name: DNABERT_S
+name: viral_family_classification
 channels:
   - conda-forge
 dependencies:
@@ -188,4 +188,3 @@ dependencies:
       - wrapt==1.17.2
       - xxhash==3.5.0
       - yarl==1.18.3
-prefix: /linkhome/rech/gensqv01/unb69nk/.conda/envs/DNABERT_S
