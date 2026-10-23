@@ -16,7 +16,7 @@ def create_model_output_dir():
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     model_dir = os.path.join(base_dir, f"{timestamp}")
     os.makedirs(model_dir, exist_ok=True)
-    subfolders = ["logs", "checkpoints", "predictions"]
+    subfolders = ["logs", "checkpoints"]
     for folder in subfolders:
         os.makedirs(os.path.join(model_dir, folder), exist_ok=True)
     return {

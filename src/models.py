@@ -126,8 +126,9 @@ class Trainer:
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, patience=5
         )
+        tokenizer_path = args.tokenizer or args.model_unsupervised
         self.tokenizer = AutoTokenizer.from_pretrained(
-            args.tokenizer, trust_remote_code=True, revision="main"
+            tokenizer_path, trust_remote_code=True, revision="main"
         )
         count_parameters(self.model)
 
@@ -154,7 +155,18 @@ class Trainer:
             new_state_dict[new_key] = v
         self.model.load_state_dict(new_state_dict, strict=False)
         # Find last epoch :
-        last_epoch = int(args.resume.split("_")[3])
+        checkpoint_parts = os.path.basename(args.resume).split("_")
+        if (
+            len(checkpoint_parts) < 3
+            or checkpoint_parts[0] != "model"
+            or checkpoint_parts[1] != "epoch"
+            or not checkpoint_parts[2].isdigit()
+        ):
+            raise ValueError(
+                "Resume checkpoint must be named "
+                "'model_epoch_<N>_<dataset>_pretrained_<bool>.pt'."
+            )
+        last_epoch = int(checkpoint_parts[2])
         logger.info("Last epoch of training was epoch : %s", last_epoch)
         args.start_epoch = last_epoch + 1
         args.output_dir = os.path.dirname(args.resume)
@@ -237,7 +249,7 @@ class Trainer:
                 f"val Loss: {val_loss / len(val_loader):.4f} | val Acc: {val_acc:.4f}%"
                 )
             if mean_epoch_loss < best_epoch_loss:
-                if self.nb_gpus == 1:
+                if self.nb_gpus == 1 or self.nb_gpus == 0:
                     # Save the model :
                     model_name = get_save_model_path(args, epoch)
                     torch.save(self.model.state_dict(), model_name)

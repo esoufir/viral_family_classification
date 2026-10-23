@@ -19,7 +19,6 @@ from sklearn.metrics import (
     classification_report,
 )
 from pathlib import Path
-from types import SimpleNamespace
 from dataloader import contig_loader_csv_test, contig_loader_fasta, SamplesNames
 from models import Classifier
 
@@ -98,7 +97,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
                 "true_class_name": df_inputs[f"{args.rank}"],
             }
             df_predictions = pd.DataFrame(df_predictions)
-            path_output_file = f"outputs/{output_dir}/predictions/predictions_{Path(args.data_path).stem}.csv"
+            path_output_file = f"{output_dir}/predictions_{Path(args.data_path).stem}.csv"
             df_predictions.to_csv(path_output_file, index=None)
             logger.info("Predictions saved in %s", path_output_file)
         # When labels are not availables:
@@ -130,7 +129,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
                 "proba_max": probas,
             }
             df_predictions = pd.DataFrame(df_predictions)
-            path_output_file = f"outputs/{output_dir}/predictions/predictions_{Path(args.data_path).stem}.csv"
+            path_output_file = f"{output_dir}/predictions_{Path(args.data_path).stem}.csv"
             df_predictions.to_csv(path_output_file, index=None)
             logger.info("Predictions saved in %s", path_output_file)
 
@@ -139,7 +138,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
 
 def predict_conformal(model, test_loader, tokenizer, device, args, output_dir):
     """Predict conformal predictions by batch using the model and its arguments."""
-    path_output_file = f"outputs/{output_dir}/predictions/conformal_predictions_{Path(args.data_path).stem}_calibration_{str(args.conformal)}.csv"
+    path_output_file = f"{output_dir}/conformal_predictions_{Path(args.data_path).stem}_calibration_{str(args.conformal)}.csv"
 
     with torch.no_grad(), open(path_output_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -253,7 +252,7 @@ def predict_conformal(model, test_loader, tokenizer, device, args, output_dir):
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_path = Path(args.model_path)
-    output_dir = model_path.parents[1].name
+    output_dir = Path("predictions")
     df_labels = pd.read_csv(args.family2id)
     df_labels["id_Family"] = df_labels["id_Family"].apply(lambda x: int(x))
     family_to_id = df_labels.set_index("Family")["id_Family"].to_dict()
@@ -268,7 +267,7 @@ def main(args):
     args.rank="Family"
     args.num_classes = len(family_to_id)
 
-    log_dir = Path("outputs") / output_dir / "predictions"
+    log_dir = Path("predictions")
     log_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         filename=log_dir / "predict_dnabert2.log",

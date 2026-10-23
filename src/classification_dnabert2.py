@@ -66,8 +66,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--tokenizer",
         type=str,
-        default="DNABERT_2_pretrained",
-        help="Path to used tokenizer",
+        default=None,
+        help="Path to used tokenizer (defaults to --model_unsupervised)",
     )
     parser.add_argument(
         "--model_unsupervised",
