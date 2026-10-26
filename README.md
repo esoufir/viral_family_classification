@@ -39,7 +39,7 @@ Training and validation CSV files must contain these columns:
 | `Seq` | DNA sequence |
 | `id_Family` | Numeric family label |
 
-For prediction, a labeled CSV must also contain a `Family` column with the family name for each row. The `--family2id` file must be a CSV with `Family` and `id_Family` columns to map family names to class IDs. Alternatively, `--data_path` can point to a FASTA file: its record IDs and sequences are read directly, without labels.
+For prediction, a labeled CSV must also contain a `Family` column with the family name for each row. The `--family2id` file must be a CSV with `Family` and `id_Family` columns to map family names to class IDs. Alternatively, `--data_file` can point to a FASTA file: its record IDs and sequences are read directly, without labels.
 
 ### Predict with the model
 
@@ -50,7 +50,7 @@ cd src/
 
 | Parameter | Description |
 | --- | --- |
-| `--data_path` | Input CSV or FASTA file. CSV input must include the columns described above. |
+| `--data_file` | Input CSV or FASTA file. CSV input must include the columns described above. |
 | `--model_path` | Path to the trained classifier checkpoint (`.pt`). |
 | `--model_unsupervised` | Path to the pretrained DNABERT-2 model and tokenizer files. |
 | `--batch_size` | Number of sequences processed per batch. |
@@ -60,14 +60,20 @@ cd src/
 The pretrained DNABERT-2 model is included in `models/DNABERT_2_pretrained/`. From `src/`, pass its local path using `--model_unsupervised`. For example, to evaluate predictions on a labeled CSV:
 
 ```
-python predict.py --data_path ../toy_example/test.csv  --model_path ../models/model_train_split_on_sequences_DA.pt  --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv
+python predict.py --data_file ../toy_example/test.csv  --model_path ../models/model_train_split_on_sequences_DA.pt  --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv
 ```
 
 To predict sequences from a FASTA file without labels, use the same local model path:
 
 ```
-python predict.py --data_path ../toy_example/test.fasta --model_path ../models/model_train_split_on_sequences_DA.pt --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv
+python predict.py --data_file ../toy_example/test.fasta --model_path ../models/model_train_split_on_sequences_DA.pt --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv
 ```
+
+
+> [!NOTE]
+> If you run into an error like : `RuntimeError: 0 active drivers ([]). There should only be one.`, please, update `triton` package to version 3.4.0 with :
+> `pip install -U triton=3.4.0`
+
 
 
 
@@ -76,7 +82,7 @@ python predict.py --data_path ../toy_example/test.fasta --model_path ../models/m
 Especially, to perform conformal predictions, use the `--conformal` argument with the threshold used in the publication = 0.9899547258391976.
 
 ```
-python predict.py --data_path ../toy_example/test.csv  --model_path ../models/model_train_split_on_sequences_DA.pt  --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv --conformal 0.9899547258391976
+python predict.py --data_file ../toy_example/test.csv  --model_path ../models/model_train_split_on_sequences_DA.pt  --model_unsupervised ../models/DNABERT_2_pretrained/ --batch_size 10 --family2id ../toy_example/family2id.csv --conformal 0.9899547258391976
 ```
 
 

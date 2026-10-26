@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def get_args():
     """Arguments parser for predictions."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", type=str, help="Path to data on which to predict (CSV OR FASTA).")
+    parser.add_argument("--data_file", type=str, help="Path to data on which to predict (CSV OR FASTA).")
     parser.add_argument("--model_path", type=str, help="Path to model's weights.")
     parser.add_argument("--model_unsupervised", type=str, help="Path to model's weights pretrained for tokenizer.")
     parser.add_argument("--batch_size", type=int, help="Train batch size.")
@@ -84,7 +84,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
             logger.info("Recall (macro): %s", recall)
             logger.info("F1-score (macro)  : %s", f1)
 
-            df_inputs = pd.read_csv(args.data_path)
+            df_inputs = pd.read_csv(args.data_file)
             true_labels_reindexed = df_inputs[args.rank].map(args.family_to_id).tolist()
             predictions_family = [args.id_to_family.get(p) for p in predictions]
 
@@ -97,7 +97,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
                 "true_class_name": df_inputs[f"{args.rank}"],
             }
             df_predictions = pd.DataFrame(df_predictions)
-            path_output_file = f"{output_dir}/predictions_{Path(args.data_path).stem}.csv"
+            path_output_file = f"{output_dir}/predictions_{Path(args.data_file).stem}.csv"
             df_predictions.to_csv(path_output_file, index=None)
             logger.info("Predictions saved in %s", path_output_file)
         # When labels are not availables:
@@ -129,7 +129,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
                 "proba_max": probas,
             }
             df_predictions = pd.DataFrame(df_predictions)
-            path_output_file = f"{output_dir}/predictions_{Path(args.data_path).stem}.csv"
+            path_output_file = f"{output_dir}/predictions_{Path(args.data_file).stem}.csv"
             df_predictions.to_csv(path_output_file, index=None)
             logger.info("Predictions saved in %s", path_output_file)
 
@@ -138,7 +138,7 @@ def predict(model, test_loader, tokenizer, device, args, output_dir):
 
 def predict_conformal(model, test_loader, tokenizer, device, args, output_dir):
     """Predict conformal predictions by batch using the model and its arguments."""
-    path_output_file = f"{output_dir}/conformal_predictions_{Path(args.data_path).stem}_calibration_{str(args.conformal)}.csv"
+    path_output_file = f"{output_dir}/conformal_predictions_{Path(args.data_file).stem}_calibration_{str(args.conformal)}.csv"
 
     with torch.no_grad(), open(path_output_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -279,12 +279,12 @@ def main(args):
     
     logger.info("Classification prediction")
     logger.info("Loading data...")
-    if args.data_path.endswith(".csv"):
+    if args.data_file.endswith(".csv"):
         test_loader = contig_loader_csv_test(args)
     else:
         test_loader = contig_loader_fasta(args)
         args.is_fasta=True
-    logger.info("Dataname:%s", args.data_path)
+    logger.info("Dataname:%s", args.data_file)
     # Load model and its dictionnary
     logger.info("Loading model...")
     logger.info("Model name:%s", output_dir)
