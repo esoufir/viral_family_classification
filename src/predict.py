@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Code for predicting viral family classification using a trained model.
 """

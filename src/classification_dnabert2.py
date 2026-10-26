@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Main code for training the classifier.
 """
